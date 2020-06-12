@@ -63,20 +63,51 @@ let upload = multer({
         let ext = exts[exts.length - 1];
         if (types.indexOf(ext) === -1) {
             // 拒绝这个文件，使用`false`，像这样:
-            return cb(new Error("扩展名错误"));
+            // return cb(new Error("扩展名错误"));
+            return cb(new Error("扩展名无效"))
+            // return;
         }
 
         // 接受这个文件，使用`true`，像这样:
-        return cb(null, true)
+        cb(null, true)
     },
     limits: {
-        fileSize:400*1000
+        fileSize: 400 * 1000
     }
 });
 
+let cpuploader = upload.single('hehe');
 
 // 上传文件必须使用post
-router.post('/upload', upload.single('hehe'), (req, res) => {
+// router.post('/upload', upload.single('hehe'), (req, res) => {
+//     // hehe为 要上传图片数据的key值
+//     // upload(req, res, function (err) {
+//     //     if (err instanceof multer.MulterError) {
+//     //         console.log(err);
+//     //         return res.send("扩展名错误")
+//     //     } else if (err) {
+//     //         return res.send("扩展名错误")
+//     //         console.log(err);
+//     //     }
+
+
+//     // })
+//     // // 一切都好
+//     // single('hehe')
+//     let url = `/public/image/${req.file.filename}`
+//     res.send({err:0, msg:'上传', img:url})
+// })
+
+
+router.post('/upload', (req, res) => {
+    cpuploader(req, res, err => {
+        if (err) {
+            res.send({ err: -1, msg: err.toString() });
+        } else {
+            let url = `/public/image/${req.file.filename}`
+            res.send({ err: 0, msg: '上传', img: url })
+        }
+    })
     // hehe为 要上传图片数据的key值
     // upload(req, res, function (err) {
     //     if (err instanceof multer.MulterError) {
@@ -91,8 +122,7 @@ router.post('/upload', upload.single('hehe'), (req, res) => {
     // })
     // // 一切都好
     // single('hehe')
-    let url = `/public/image/${req.file.filename}`
-    res.send({err:0, msg:'上传', img:url})
+
 })
 
 router.use(function (err, req, res, next) {
